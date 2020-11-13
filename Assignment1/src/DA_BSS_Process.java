@@ -19,6 +19,7 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
 
     @Override
     public void broadcast(Message m) throws RemoteException {
+        System.out.println(index);
 
     }
 
