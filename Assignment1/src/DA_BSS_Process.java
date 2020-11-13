@@ -1,3 +1,6 @@
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -22,13 +25,22 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
 
     @Override
     public void broadcast(Message m) throws RemoteException {
-        System.out.println(index);
+        try {
+            DA_BSS_RMI x = (DA_BSS_RMI) Naming.lookup(ipList.get(1)+"//DA_BSS_Process");
+            DA_BSS_RMI x2 = (DA_BSS_RMI) Naming.lookup(ipList.get(2)+"//DA_BSS_Process");
+            x.receive(null);
+            x2.receive(null);
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
     }
 
     @Override
     public void receive(Message m) throws RemoteException {
-
+        System.out.println(index);
     }
 
     @Override

@@ -40,8 +40,7 @@ public class DA_BSS_Main {
             Naming.rebind(p2ip +"//DA_BSS_Process", p2);
 
             p0.broadcast(null);
-            p1.broadcast(null);
-            p2.broadcast(null);
+
 
         } catch (RemoteException | MalformedURLException e) {
             System.err.println("Main.main error: " +  e.toString());
