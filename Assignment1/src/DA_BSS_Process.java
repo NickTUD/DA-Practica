@@ -1,5 +1,6 @@
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,9 +9,11 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
     private int[] clock;
     private Set<Message> buffer = new HashSet<Message>();
     private int index;
+    private ArrayList<String> ipList;
 
-    public DA_BSS_Process(int index) throws RemoteException {
+    public DA_BSS_Process(int index, ArrayList<String> newIpList) throws RemoteException {
         this.index = index;
+        ipList = newIpList;
     }
 
     private void updateClock(int index){
