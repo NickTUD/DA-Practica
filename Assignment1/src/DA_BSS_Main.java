@@ -9,10 +9,6 @@ import java.util.ArrayList;
  */
 public class DA_BSS_Main {
 
-    /**
-     *
-     * @param args
-     */
     public static void main(String[] args) {
         ArrayList<String> ipList = new ArrayList<String>();
 
@@ -25,7 +21,6 @@ public class DA_BSS_Main {
         ipList.add(p2ip);
 
         try {
-            //Registry registry = LocateRegistry.getRegistry(host);
             //Create process 0
             java.rmi.registry.LocateRegistry.createRegistry(1099);
             DA_BSS_Process p0 = new DA_BSS_Process(0, ipList);
@@ -39,7 +34,7 @@ public class DA_BSS_Main {
             DA_BSS_Process p2 = new DA_BSS_Process(2,ipList);
             Naming.rebind(p2ip +"//DA_BSS_Process", p2);
 
-            p0.broadcast(null);
+            p0.broadcast("P0: M0");
 
 
         } catch (RemoteException | MalformedURLException e) {
