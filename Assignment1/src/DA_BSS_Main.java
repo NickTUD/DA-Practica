@@ -3,7 +3,7 @@ import java.rmi.*;
 import java.util.ArrayList;
 
 /**
- *
+ * Class that runs the Birman-Schiper-Stephenson algorithm
  */
 public class DA_BSS_Main {
 
@@ -32,7 +32,13 @@ public class DA_BSS_Main {
             DA_BSS_Process p2 = new DA_BSS_Process(2,ipList);
             Naming.rebind(p2ip +"//DA_BSS_Process", p2);
 
-            p0.broadcast("P0: M0");
+            //TODO Add threading(?). Messages are always processed in order so not sure on how to test the buffer code.
+            p0.broadcast("P0 - First message");
+            p1.broadcast("P1 - First message");
+            p0.broadcast("P0 - Second message");
+
+            System.out.println("Everything is done");
+
 
 
         } catch (RemoteException | MalformedURLException e) {
