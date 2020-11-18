@@ -2,8 +2,6 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  *
@@ -11,7 +9,7 @@ import java.util.Set;
 public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
 
     private int[] clock;
-    private Set<Message> buffer = new HashSet<Message>();
+    private ArrayList<Message> buffer = new ArrayList<>();
     private int ownIndex;
     private ArrayList<String> ipList;
 
@@ -45,19 +43,17 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
     @Override
     public void broadcast(String text) throws RemoteException {
 
+        System.out.println("Trying to broadcast message");
+
         //Update your own index
         updateClock(this.ownIndex);
 
         //TODO Add delays
         for(int i=0; i < ipList.size(); i++) {
-
             if(i != ownIndex) {
-
                 try {
-
                     DA_BSS_RMI otherProcess = (DA_BSS_RMI) Naming.lookup(ipList.get(i)+ "//DA_BSS_Process");
                     otherProcess.receive(new Message(text, this.clock, this.ownIndex));
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -67,7 +63,28 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
 
     @Override
     public void receive(Message msg) throws RemoteException {
+        if (canDeliver(msg)) {
 
+            try {
+
+                DA_BSS_RMI ownProcess = (DA_BSS_RMI) Naming.lookup(ipList.get(ownIndex)+ "//DA_BSS_Process");
+                ownProcess.receive(msg);
+
+                boolean loop = true;
+                for(int i=0; i < buffer.size(); i++) {
+                        Message bufferMsg = buffer.get(i);
+                        if(canDeliver(bufferMsg)) {
+                            ownProcess.receive(msg);
+                        }
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            this.buffer.add(msg);
+        }
     }
 
     @Override

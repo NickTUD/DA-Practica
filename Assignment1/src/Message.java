@@ -1,7 +1,9 @@
+import java.io.Serializable;
+
 /**
  * Class which represents the messages that can be sent between processes.
  */
-public class Message {
+public class Message implements Serializable {
 
     private final String text;
     private final int[] clock;
