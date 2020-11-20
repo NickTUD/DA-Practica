@@ -39,6 +39,16 @@ public class DA_BSS_Main {
 
                     try {
                         p0.broadcast("P0 - First message");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            Thread t2 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    try {
                         p0.broadcast("P0 - Second message");
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -46,18 +56,12 @@ public class DA_BSS_Main {
                 }
             });
 
-            Thread t2 = new Thread(new Runnable() {
-                @Override
-                public void run() {
-
-                    try {
-                        p1.broadcast("P1 - First message");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
             t1.start();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             t2.start();
 
 
@@ -65,7 +69,8 @@ public class DA_BSS_Main {
 
 
 
-            System.out.println("Everything is done");
+
+
 
         } catch (RemoteException | MalformedURLException e) {
             System.err.println("Main.main error: " +  e.toString());

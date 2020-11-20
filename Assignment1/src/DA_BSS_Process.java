@@ -45,8 +45,8 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
         int[] localClock = this.clock.clone();
         localClock[msg.getFromIndex()] += 1;
 
-        System.out.println(Arrays.toString(msgClock));
-        System.out.println(Arrays.toString(localClock));
+        //System.out.println(Arrays.toString(msgClock));
+        //System.out.println(Arrays.toString(localClock));
         for(int i = 0; i < localClock.length; i++) {
             if(localClock[i] < msgClock[i]){
                 return false;
@@ -72,11 +72,12 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
         int[] msgClock = this.clock.clone();
 
         //TODO Add random delays
+        //System.out.println("Sent this clock: " + Arrays.toString(this.clock));
         for(int i=0; i < ipList.size(); i++) {
             if(i != ownIndex) {
                 try {
                     DA_BSS_RMI otherProcess = (DA_BSS_RMI) Naming.lookup(ipList.get(i)+ "//DA_BSS_Process");
-                    System.out.println("Sent this clock: " + Arrays.toString(this.clock));
+
                     otherProcess.receive(new Message(text, msgClock, this.ownIndex));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -92,7 +93,13 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
      */
     @Override
     public void receive(Message msg) throws RemoteException {
-
+        if(msg.getText().equals("P0 - First message")&&ownIndex==2){
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         System.out.println("Process " + ownIndex + " received message: " + msg.getText());
 
         if (canDeliver(msg)) {
@@ -108,9 +115,10 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
                 boolean deliveredNonZero = true;
                 while(deliveredNonZero){
                     deliveredNonZero = false;
-                    for (Message bufferMsg : buffer) {
-                        if (canDeliver(bufferMsg)) {
-                            ownProcess.deliver(bufferMsg);
+                    for(int i=0;i<buffer.size();i++){
+                        Message current = buffer.get(i);
+                        if (canDeliver(current)) {
+                            ownProcess.deliver(current);
                             deliveredNonZero = true;
                         }
                     }
@@ -126,6 +134,8 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
             this.buffer.add(msg);
         }
     }
+
+
 
     /**
      * Method that gets invoked when a message can be delivered.
@@ -143,6 +153,8 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
         updateClock(msg.getFromIndex());
 
         // Remove message from the buffer
+
         this.buffer.remove(msg);
+
     }
 }
