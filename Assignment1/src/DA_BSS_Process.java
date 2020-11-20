@@ -2,6 +2,7 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Class that represents one process in the Birman-Schiper-Stephenson algorithm
@@ -31,7 +32,7 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
      * @param index Index of the clock that needs to be updated
      */
     private void updateClock(int index){
-        clock[index] += 1;
+        this.clock[index] += 1;
     }
 
     /**
@@ -43,6 +44,9 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
         int[] msgClock = msg.getClock();
         int[] localClock = this.clock.clone();
         localClock[msg.getFromIndex()] += 1;
+
+        System.out.println(Arrays.toString(msgClock));
+        System.out.println(Arrays.toString(localClock));
         for(int i = 0; i < localClock.length; i++) {
             if(localClock[i] < msgClock[i]){
                 return false;
@@ -65,13 +69,15 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
 
         //Update your own index
         updateClock(this.ownIndex);
+        int[] msgClock = this.clock.clone();
 
         //TODO Add random delays
         for(int i=0; i < ipList.size(); i++) {
             if(i != ownIndex) {
                 try {
                     DA_BSS_RMI otherProcess = (DA_BSS_RMI) Naming.lookup(ipList.get(i)+ "//DA_BSS_Process");
-                    otherProcess.receive(new Message(text, this.clock, this.ownIndex));
+                    System.out.println("Sent this clock: " + Arrays.toString(this.clock));
+                    otherProcess.receive(new Message(text, msgClock, this.ownIndex));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -115,6 +121,7 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
 
         } else {
 
+            System.out.println("Couldnt deliver for process " + this.ownIndex);
             // If a message can't be delivered, add it to the buffer.
             this.buffer.add(msg);
         }

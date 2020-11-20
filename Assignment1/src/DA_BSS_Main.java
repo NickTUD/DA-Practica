@@ -1,5 +1,6 @@
 import java.net.MalformedURLException;
 import java.rmi.*;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 
 /**
@@ -8,7 +9,7 @@ import java.util.ArrayList;
 public class DA_BSS_Main {
 
     public static void main(String[] args) {
-        ArrayList<String> ipList = new ArrayList<String>();
+        ArrayList<String> ipList = new ArrayList<>();
 
         String p0ip = "rmi://localhost:1099";
         String p1ip = "rmi://localhost:1100";
@@ -32,14 +33,39 @@ public class DA_BSS_Main {
             DA_BSS_Process p2 = new DA_BSS_Process(2,ipList);
             Naming.rebind(p2ip +"//DA_BSS_Process", p2);
 
-            //TODO Add threading(?). Messages are always processed in order so not sure on how to test the buffer code.
-            p0.broadcast("P0 - First message");
-            p1.broadcast("P1 - First message");
-            p0.broadcast("P0 - Second message");
+            Thread t1 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    try {
+                        p0.broadcast("P0 - First message");
+                        p0.broadcast("P0 - Second message");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            Thread t2 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    try {
+                        p1.broadcast("P1 - First message");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            t1.start();
+            t2.start();
+
+
+
+
+
 
             System.out.println("Everything is done");
-
-
 
         } catch (RemoteException | MalformedURLException e) {
             System.err.println("Main.main error: " +  e.toString());
