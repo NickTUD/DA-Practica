@@ -14,11 +14,9 @@ public class DA_BSS_Main {
         String p0ip = "rmi://localhost:1099";
         String p1ip = "rmi://localhost:1100";
         String p2ip = "rmi://localhost:1101";
-
         ipList.add(p0ip);
         ipList.add(p1ip);
         ipList.add(p2ip);
-
         try {
             //Create process 0
             java.rmi.registry.LocateRegistry.createRegistry(1099);
@@ -63,14 +61,6 @@ public class DA_BSS_Main {
                 e.printStackTrace();
             }
             t2.start();
-
-
-
-
-
-
-
-
 
         } catch (RemoteException | MalformedURLException e) {
             System.err.println("Main.main error: " +  e.toString());

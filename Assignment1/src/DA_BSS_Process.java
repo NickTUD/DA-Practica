@@ -26,7 +26,6 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
         this.ipList = ipList;
         this.clock = new int[ipList.size()];
     }
-
     /**
      * Updates the clock at the position index
      * @param index Index of the clock that needs to be updated
@@ -55,7 +54,6 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
         return true;
     }
 
-
     /**
      * Method that broadcasts some content (in this case a string). A broadcast implies that it is sent to all other
      * processes.
@@ -71,7 +69,6 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
         updateClock(this.ownIndex);
         int[] msgClock = this.clock.clone();
 
-        //TODO Add random delays
         //System.out.println("Sent this clock: " + Arrays.toString(this.clock));
         for(int i=0; i < ipList.size(); i++) {
             if(i != ownIndex) {
@@ -101,16 +98,11 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
             }
         }
         System.out.println("Process " + ownIndex + " received message: " + msg.getText());
-
         if (canDeliver(msg)) {
-
             try {
-
                 // If a message can be delivered according to the process' clock, then do it.
                 DA_BSS_RMI ownProcess = (DA_BSS_RMI) Naming.lookup(ipList.get(ownIndex)+ "//DA_BSS_Process");
                 ownProcess.deliver(msg);
-
-
                 // Loop over the buffer, checking whether we can deliver a message
                 boolean deliveredNonZero = true;
                 while(deliveredNonZero){
@@ -126,9 +118,7 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         } else {
-
             System.out.println("Couldnt deliver for process " + this.ownIndex);
             // If a message can't be delivered, add it to the buffer.
             this.buffer.add(msg);
@@ -144,17 +134,12 @@ public class DA_BSS_Process extends UnicastRemoteObject implements DA_BSS_RMI {
      */
     @Override
     public void deliver(Message msg) throws RemoteException {
-
         // "Deliver" results
         System.out.println("Process " + ownIndex + " delivered message: " + msg.getText());
         deliveredMessages.add(msg.getText());
-
         // Update clock
         updateClock(msg.getFromIndex());
-
         // Remove message from the buffer
-
         this.buffer.remove(msg);
-
     }
 }
