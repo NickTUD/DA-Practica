@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
  * Interface which represents the methods that can be invoked by other objects
  */
 public interface DA_PSON_RMI extends Remote {
+    void receive(int id, boolean singleN) throws RemoteException;
 
     /**
      * Method that broadcasts a message to other methods
