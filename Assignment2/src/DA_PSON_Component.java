@@ -1,36 +1,39 @@
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 
 
 public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RMI {
+    private ArrayList<String> ipList;
     private boolean active;
     private int ownID;
     private int tid;
     private int ntid;
     private int nntid;
     boolean hasSentTid;
-    private DA_PSON_Component next;
+    private String nextString;
 
-    public DA_PSON_Component(int ownID) throws RemoteException {
+    public DA_PSON_Component(int ownID, ArrayList<String> newIpList) throws RemoteException {
         active = true;
         this.ownID = ownID;
         tid = ownID;
         ntid = -1;
         nntid = -1;
         hasSentTid=false;
+        ipList=newIpList;
     }
 
     public void performElectionRound() {
         //send tid to downstream neighbor
 
         System.out.println("Component with id="+ownID+" is performing election round.");
-        try {
-            hasSentTid=true;
-            next.receive(tid, true);
 
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        hasSentTid = true;
+        sendToNext(tid, true);
+
 
     }
 
@@ -49,7 +52,7 @@ public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RM
                 //now tid is always defined if it was not already
                 ntid = receivedID;
                 //now ntid is defined
-                next.receive(Integer.max(tid, ntid), false);
+                sendToNext(Integer.max(tid, ntid), false);
                 if (nntid != -1) {//so we have all 3 tid ntid and nntid defined
                     performCheckToTurnPassive(tid, ntid, nntid);
                 }
@@ -67,9 +70,22 @@ public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RM
             }
         } else {
             //if passive:
-            next.receive(receivedID, singleN);
+            sendToNext(receivedID, singleN);
         }
 
+    }
+
+    private void sendToNext(int receivedID, boolean singleN) {
+        try {
+            DA_PSON_RMI nextComponent = (DA_PSON_RMI) Naming.lookup(nextString);
+            nextComponent.receive(receivedID,singleN);
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     private void performCheckToTurnPassive(int tid, int ntid, int nntid) {
@@ -90,8 +106,8 @@ public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RM
         hasSentTid=false;
     }
 
-    public void setNext(DA_PSON_Component n) {
-        next = n;
+    public void setNextString(String n) {
+        nextString = n;
     }
 
     public boolean isActive() {
@@ -102,8 +118,8 @@ public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RM
         return ownID;
     }
 
-    public DA_PSON_Component getNext() {
-        return next;
+    public String getNextString() {
+        return nextString;
     }
 
 
