@@ -26,9 +26,10 @@ public class DA_PSON_Main {
             }
             ComponentList.get(i).setNext(ComponentList.get(nextIndex));
         }
-        for(int i=0;i<ComponentList.size();i++){
-            ComponentList.get(i).performElectionRound();
-        }
+        ComponentList.get(0).performElectionRound();
+        //ComponentList.get(0).performElectionRound();
+
+
 
     }
 }
