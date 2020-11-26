@@ -27,7 +27,8 @@ public class DA_PSON_Main {
             ComponentList.get(i).setNext(ComponentList.get(nextIndex));
         }
         ComponentList.get(0).performElectionRound();
-        //ComponentList.get(0).performElectionRound();
+        ComponentList.get(0).performElectionRound();
+        ComponentList.get(1).performElectionRound();
 
 
 

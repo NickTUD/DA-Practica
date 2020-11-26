@@ -36,6 +36,11 @@ public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RM
 
     @Override
     public void receive(int receivedID, boolean singleN) throws RemoteException {
+        //The process that received its own id has been elected
+        if(receivedID==ownID){
+            System.out.println("The Elected Leadder is me: Component with id = "+ownID);
+            System.exit(0);
+        }
         if (active) {
             if (singleN) {//so ntid is received
                 if (hasSentTid==false) {//so hasnt started yet
@@ -68,18 +73,20 @@ public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RM
     }
 
     private void performCheckToTurnPassive(int tid, int ntid, int nntid) {
-        if(ntid>=tid && ntid>=nntid){
-            //remain active
-            tid=ntid;//take on the value of upstream node
-            System.out.println("Component with original id " + ownID + " has remained active and taken on ntid: " + ntid);
-        } else {
-            //turn passive
-            active=false;
-            System.out.println("Component with original id " + ownID + " has turned passive");
+        if(active){
+            if(ntid>=tid && ntid>=nntid){
+                //remain active
+                this.tid=ntid;//take on the value of upstream node
+                System.out.println("Component with original id " + ownID + " has remained active and taken on ntid: " + ntid);
+            } else {
+                //turn passive
+                active=false;
+                System.out.println("Component with original id " + ownID + " has turned passive");
+            }
         }
         //either case, the round is over.
-        ntid=-1;
-        nntid=-1;
+        this.ntid=-1;
+        this.nntid=-1;
         hasSentTid=false;
     }
 
