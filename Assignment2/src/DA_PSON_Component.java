@@ -16,14 +16,14 @@ public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RM
     boolean hasSentTid;
     private String nextString;
 
-    public DA_PSON_Component(int ownID, ArrayList<String> newIpList) throws RemoteException {
+    public DA_PSON_Component(int ownID, String nnextString) throws RemoteException {
         active = true;
         this.ownID = ownID;
         tid = ownID;
         ntid = -1;
         nntid = -1;
         hasSentTid=false;
-        ipList=newIpList;
+        nextString=nnextString;
     }
 
     public void performElectionRound() {

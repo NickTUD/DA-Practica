@@ -16,7 +16,7 @@ public class DA_PSON_Main {
         for(int i=0;i<ipList.size();i++){
             try {
                 java.rmi.registry.LocateRegistry.createRegistry(1100+i);
-                DA_PSON_Component currentComponent = new DA_PSON_Component(exampleFromSlides[i], ipList);
+                DA_PSON_Component currentComponent = new DA_PSON_Component(exampleFromSlides[i], "lmao");
                 Naming.rebind(ipList.get(i) +"//DA_PSON_Component", currentComponent);
                 ComponentList.add(currentComponent);
             } catch (RemoteException | MalformedURLException e) {
