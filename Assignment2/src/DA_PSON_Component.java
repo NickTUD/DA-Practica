@@ -16,9 +16,6 @@ public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RM
     boolean hasSentTid;
     private String nextString;
 
-    private boolean hasSentFinished;
-    private boolean finished;
-
     public DA_PSON_Component(int ownID, String nnextString) throws RemoteException {
         active = true;
         this.ownID = ownID;
@@ -32,39 +29,21 @@ public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RM
     public void performElectionRound() {
         //send tid to downstream neighbor
 
+        System.out.println("Component with id="+ownID+" is performing election round.");
 
-        if (active) {
-            System.out.println("Component with id="+ ownID +" is performing election round.");
-
-            hasSentTid = true;
-            sendToNext(tid, true);
-
-        } else {
-
-            try {
-                DA_PSON_RMI nextComponent = (DA_PSON_RMI) Naming.lookup(nextString);
-                nextComponent.performElectionRound();
-            } catch (NotBoundException e) {
-                e.printStackTrace();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-
-        }
+        hasSentTid = true;
+        sendToNext(tid, true);
 
 
     }
 
     @Override
     public void receive(int receivedID, boolean singleN) throws RemoteException {
-
         //The process that received its own id has been elected
         if(receivedID==ownID){
-            System.out.println("The Elected Leadder is me: Component with id = "+ ownID);
+            System.out.println("The Elected Leadder is me: Component with id = "+ownID);
+            System.exit(0);
         }
-
         if (active) {
             if (singleN) {//so ntid is received
                 if (hasSentTid==false) {//so hasnt started yet
