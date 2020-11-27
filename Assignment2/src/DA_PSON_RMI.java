@@ -7,6 +7,8 @@ import java.rmi.RemoteException;
 public interface DA_PSON_RMI extends Remote {
     void receive(int id, boolean singleN) throws RemoteException;
 
+    void performElectionRound() throws RemoteException;
+
     /**
      * Method that broadcasts a message to other methods
      * Content of the message can be of any type, we assume text for now.

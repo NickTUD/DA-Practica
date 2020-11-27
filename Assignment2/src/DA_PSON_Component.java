@@ -29,10 +29,26 @@ public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RM
     public void performElectionRound() {
         //send tid to downstream neighbor
 
-        System.out.println("Component with id="+ownID+" is performing election round.");
 
-        hasSentTid = true;
-        sendToNext(tid, true);
+        if (active) {
+            System.out.println("Component with id="+ownID+" is performing election round.");
+
+            hasSentTid = true;
+            sendToNext(tid, true);
+
+        } else {
+
+            try {
+                DA_PSON_RMI nextComponent = (DA_PSON_RMI) Naming.lookup(nextString);
+                nextComponent.performElectionRound();
+            } catch (NotBoundException e) {
+                e.printStackTrace();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
 
 
     }
