@@ -73,7 +73,6 @@ public class DA_PSON_Component extends UnicastRemoteObject implements DA_PSON_RM
         //The process that received its own id has been elected
         if (receivedID == ownID) {
             System.out.println("The Elected Leadder is me: Component with id = " + ownID);
-            System.exit(0);
         }
         if (active) {
             if (singleN) {//so ntid is received
