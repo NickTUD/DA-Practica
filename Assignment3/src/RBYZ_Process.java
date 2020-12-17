@@ -174,11 +174,11 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
         }
     }
 
-    private enum FailureType {
+    public enum FailureType {
         NONE, NO_SEND, PROB_SEND, PROB_VALUE
     }
 
-    private enum ProcessState {
+    public enum ProcessState {
         WAITING_N, WAITING_P
     }
 }
