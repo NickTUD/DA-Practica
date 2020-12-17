@@ -43,16 +43,16 @@ public class RBYZ_Main {
             String[] splittedLine = bReader.readLine().split(" ");
             if(splittedLine[1].equals(myUserID)){
                 //This means we have to make this process and host it on this machine
-                String rmiString = "rmi://" + ipList.get(myUserIDint) + ":" + defaultport + splittedLine[0];
+                String rmiString = "rmi://" + ipList.get(myUserIDint) + ":" + defaultport +"/"+ splittedLine[0];
                 startProcess(splittedLine[0],splittedLine[2],splittedLine[3],ipList,n,f,rmiString);
             }
         }
+        System.out.println("All done");
     }
 
     private static void startProcess(String index, String initialValue, String failureType, ArrayList<String> ipList, int n, int f, String rmiString) {
         try {
             RBYZ_Process proc = new RBYZ_Process(Integer.parseInt(index),Integer.parseInt(initialValue), RBYZ_Process.FailureType.valueOf(failureType),ipList,n,f);
-            System.out.println("The code works up until this point");
             Naming.rebind(rmiString, proc);
             System.out.println("Started process with id = "+index + " at "+rmiString);
         } catch (RemoteException | MalformedURLException e) {
