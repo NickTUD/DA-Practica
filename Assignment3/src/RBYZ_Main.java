@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public class RBYZ_Main {
     //USERID 0 = ALAN
     //USERID 1 = NICK
+    private static ArrayList<RBYZ_Process> processList = new ArrayList<>();
     public static void main(String[] args) throws IOException {
         //Make sure the program arguments are correctly set. args[0]=0 for Alan, args[0]=1 for Nick.
         if(args.length!=1){
@@ -22,7 +23,7 @@ public class RBYZ_Main {
         LocateRegistry.createRegistry(defaultport);
 
         //read the test file
-        String testFilePath = "5processes.txt";
+        String testFilePath = "40processes.txt";
         BufferedReader bReader = new BufferedReader(new FileReader(new File("").getAbsolutePath()+"/src/"+testFilePath));
 
         //find ip addresses
@@ -54,6 +55,7 @@ public class RBYZ_Main {
         try {
             RBYZ_Process proc = new RBYZ_Process(Integer.parseInt(index),Integer.parseInt(initialValue), RBYZ_Process.FailureType.valueOf(failureType),ipList,n,f);
             Naming.rebind(rmiString, proc);
+            processList.add(proc);
             System.out.println("Started process with id = "+index + " at "+rmiString);
         } catch (RemoteException | MalformedURLException e) {
             e.printStackTrace();
