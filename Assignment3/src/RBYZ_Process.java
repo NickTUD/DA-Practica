@@ -157,7 +157,7 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
                 value = 1;
                 if(sum > 3f) {
                     if(!decided) {
-                        System.out.println("Process " + index + " decided 1");
+                        System.out.println("Process " + index + " decided 1 in round " +round);
                         decidedInRound = round;
                     }
                     decided = true;
@@ -168,7 +168,7 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
                 value = 0;
                 if(n-f-sum > f) {
                     if(!decided) {
-                        System.out.println("Process " + index + " decided 0");
+                        System.out.println("Process " + index + " decided 0 in round " + round);
                         decidedInRound = round;
                     }
                     decided = true;
@@ -187,6 +187,11 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
 
     @Override
     public void run() {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         while(true) {
             if(!broadcasted){
                 broadcasted = true;

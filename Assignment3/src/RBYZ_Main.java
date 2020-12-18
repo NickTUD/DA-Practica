@@ -9,7 +9,7 @@ public class RBYZ_Main {
     //USERID 0 = ALAN
     //USERID 1 = NICK
     private static ArrayList<RBYZ_Process> processList = new ArrayList<>();
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         //Make sure the program arguments are correctly set. args[0]=0 for Alan, args[0]=1 for Nick.
         if(args.length!=1){
             System.out.println("Arguments incorrectly set. Go to Run configurations and assign 0 or 1 to the program arguments");
@@ -57,6 +57,7 @@ public class RBYZ_Main {
                 startProcess(splittedLine[0],splittedLine[2],splittedLine[3],rmiList,n,f,rmiList.get(i));
             }
         }
+
         for(int i=0;i<processList.size();i++){
             new Thread(processList.get(i)).start();
         }
