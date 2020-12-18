@@ -4,13 +4,12 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-
-//TODO IMPLEMENT BROADCASTING INVOCATION AND
 public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runnable {
 
     private ProcessState state = ProcessState.WAITING_N;
     private int round = 1;
     private boolean decided = false;
+    private boolean broadcasted = false;
     private int bufferentries = 0;
 
     private final int index;
@@ -19,8 +18,10 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
     private final int f;
     private final int n;
 
+
     private int value;
     private int[] buffer;
+    private Message msgToBroadcast;
 
 
     public RBYZ_Process(int index, int value, FailureType failureType, ArrayList<String> ipList, int n, int f) throws RemoteException {
@@ -32,6 +33,7 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
         this.n = n;
 
         this.buffer = new int[n-f];
+        this.msgToBroadcast = new Message(Message.MessageType.NOTIF, round, value);
     }
 
     /**
@@ -40,7 +42,8 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
      * @param msg The message that needs to be sent.
      * @throws RemoteException Thrown when there is a fault concerning RMI.
      */
-    private void broadcast(Message msg) throws RemoteException {
+    private void broadcast(Message msg) throws RemoteException, InterruptedException {
+        Thread.sleep(ThreadLocalRandom.current().nextInt(11) * 1000);
         switch(failureType) {
 
             case NONE:
@@ -131,12 +134,12 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
             w = ThreadLocalRandom.current().nextInt(2);
         }
 
+        // Reset the amount of messages received of the correct type.
         bufferentries = 0;
         state = ProcessState.WAITING_P;
+        msgToBroadcast = new Message(Message.MessageType.PROP, round, w);
+        broadcasted = false;
 
-        if(decided) {
-            System.exit(0);
-        }
     }
 
     private void processPropMsgs() {
@@ -164,16 +167,37 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
 
         bufferentries = 0;
         round++;
-        state = ProcessState.WAITING_P;
+        state = ProcessState.WAITING_N;
+        msgToBroadcast = new Message(Message.MessageType.NOTIF, round, value);
+        broadcasted = false;
     }
 
     @Override
     public void run() {
-        while(true){
-            //
+        while(true) {
+            if(!broadcasted){
+                broadcasted = true;
+                try {
+                    broadcast(msgToBroadcast);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                if(decided && state == ProcessState.WAITING_P) {
+                    System.exit(0);
+                }
+            }
         }
     }
 
+    /**
+     * Represents the types of failure a process can have. The following values represent the :
+     *
+     * NONE = A process that is healthy
+     * NO_SEND = A process that halted for some reason, not sending any messages
+     * PROB_SEND = A process that is faulty in its sending of messages, sometimes not sending them
+     * PROB_VALUE = A process that is faulty  in its sensor, sometimes sending a message with the wrong value.
+     */
     private enum FailureType {
         NONE, NO_SEND, PROB_SEND, PROB_VALUE
     }
