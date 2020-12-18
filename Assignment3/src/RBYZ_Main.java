@@ -18,10 +18,9 @@ public class RBYZ_Main {
         }
         ArrayList<String> ipList = new ArrayList<>();
         ArrayList<String> rmiList = new ArrayList<>();
-        int defaultport = 1099;
+        ArrayList<String> portList = new ArrayList<>();
         String myUserID = args[0];
         int myUserIDint = Integer.parseInt(myUserID);
-        LocateRegistry.createRegistry(defaultport);
 
         //read the test file
         String testFilePath = "5processes.txt";
@@ -30,10 +29,12 @@ public class RBYZ_Main {
         //find ip addresses
         int amountOfIpAddresses = Integer.parseInt(bReader.readLine());
         for(int i=0;i<amountOfIpAddresses;i++){
-            //These lines have the format: <userID> <ipAdress>
+            //These lines have the format: <userID> <ipAdress> <port>
             String[] splittedLine = bReader.readLine().split(" ");
             ipList.add(splittedLine[1]);
+            portList.add(splittedLine[2]);
         }
+        LocateRegistry.createRegistry(Integer.parseInt(portList.get(myUserIDint)));
 
         //create processes that match your own id
         //line is of the format: <n> <f>
@@ -47,7 +48,7 @@ public class RBYZ_Main {
             String[] splittedLine = lines[i].split(" ");
 
             //This means we have to make this process and host it on this machine
-            String rmiString = "rmi://" + ipList.get(Integer.parseInt(splittedLine[1])) + ":" + defaultport +"/"+ splittedLine[0];
+            String rmiString = "rmi://" + ipList.get(Integer.parseInt(splittedLine[1])) + ":" + portList.get(Integer.parseInt(splittedLine[1])) +"/"+ splittedLine[0];
             rmiList.add(rmiString);
 
         }
