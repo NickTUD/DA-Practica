@@ -190,19 +190,12 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
         }
     }
 
-    /**
-     * Represents the types of failure a process can have. The following values represent the :
-     *
-     * NONE = A process that is healthy
-     * NO_SEND = A process that halted for some reason, not sending any messages
-     * PROB_SEND = A process that is faulty in its sending of messages, sometimes not sending them
-     * PROB_VALUE = A process that is faulty  in its sensor, sometimes sending a message with the wrong value.
-     */
-    private enum FailureType {
+
+    public enum FailureType {
         NONE, NO_SEND, PROB_SEND, PROB_VALUE
     }
 
-    private enum ProcessState {
+    public enum ProcessState {
         WAITING_N, WAITING_P
     }
 }
