@@ -28,6 +28,9 @@ public class Message implements Serializable {
         this.value = value;
     }
 
+    public String toString(){
+        return "type: "+type +", round: "+ round +", value: "+ value;
+    }
     public enum MessageType {
         NOTIF, PROP
     }

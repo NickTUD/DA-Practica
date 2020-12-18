@@ -87,6 +87,7 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
      */
     @Override
     public synchronized void receive(Message msg) throws RemoteException {
+        System.out.println("Process" + index + "is in state "+state+" and is receiving " +msg.toString());
         if(round == msg.getRound()) {
             switch(state){
 
@@ -95,6 +96,7 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
                         buffer[bufferentries] = msg.getValue();
                         bufferentries++;
                         if(bufferentries == n-f) {
+                            System.out.println("Calling processNotifMsgs");
                             processNotifMsgs();
                         }
                     }
@@ -105,6 +107,7 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
                         buffer[bufferentries] = msg.getValue();
                         bufferentries++;
                         if(bufferentries == n-f) {
+                            System.out.println("Calling processpropmsgs");
                             processPropMsgs();
                         }
                     }
@@ -146,7 +149,6 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
         state = ProcessState.WAITING_P;
         msgToBroadcast = new Message(Message.MessageType.PROP, round, w);
         broadcasted = false;
-
     }
 
     private void processPropMsgs() {
@@ -199,11 +201,13 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
             if(!broadcasted){
                 broadcasted = true;
                 try {
-                    System.out.println("Process " + index + " did broadcast in round " + msgToBroadcast.getRound());
+                    System.out.println("Process " + index + " did broadcast"+ msgToBroadcast.toString()+" in round " + msgToBroadcast.getRound());
+                    System.out.println("My bufer entries = " + bufferentries);
                     broadcast(msgToBroadcast);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
             }
         }
     }
