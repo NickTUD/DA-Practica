@@ -22,6 +22,7 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
 
     private int value;
     private int[] buffer;
+    private int decidedInRound;
     private Message msgToBroadcast;
 
 
@@ -61,6 +62,10 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
                 int newvalue = ThreadLocalRandom.current().nextInt(2);
                 Message newmsg = new Message(msg.getType(), msg.getRound(), newvalue);
                 broadcastHelper(newmsg);
+        }
+
+        if(decided && decidedInRound + 1 == msg.getRound() && msg.getType() == Message.MessageType.PROP) {
+            System.exit(0);
         }
     }
 
@@ -151,14 +156,21 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
             if(sum > f) {
                 value = 1;
                 if(sum > 3f) {
-                    System.out.println("i decided 1");
+                    if(!decided) {
+                        System.out.println("Process " + index + " decided 1");
+                        decidedInRound = round;
+                    }
                     decided = true;
+
                 }
 
             } else {
                 value = 0;
                 if(n-f-sum > f) {
-                    System.out.println("i decided too its 0");
+                    if(!decided) {
+                        System.out.println("Process " + index + " decided 0");
+                        decidedInRound = round;
+                    }
                     decided = true;
                 }
             }
@@ -179,16 +191,13 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
             if(!broadcasted){
                 broadcasted = true;
                 try {
-                    if(state == )
                     System.out.println("Process " + index + " did broadcast in round " + msgToBroadcast.getRound());
                     broadcast(msgToBroadcast);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            } else {
 
-                if(decided && state == ProcessState.WAITING_P) {
-                    break;
-                }
             }
         }
     }
