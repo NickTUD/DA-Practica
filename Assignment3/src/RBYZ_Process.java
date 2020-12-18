@@ -136,6 +136,9 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
             w = 0;
         } else {
             w = ThreadLocalRandom.current().nextInt(2);
+            if(failureType==FailureType.NONE){
+                System.out.println("Correct Process " + index + "has selected random value " + w);
+            }
         }
 
         // Reset the amount of messages received of the correct type.
@@ -201,8 +204,6 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else {
-
             }
         }
     }
