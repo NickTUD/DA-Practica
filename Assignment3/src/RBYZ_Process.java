@@ -1,6 +1,7 @@
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -13,7 +14,7 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
     private int bufferentries = 0;
 
     private final int index;
-    private final ArrayList<String> ipList;
+    private final ArrayList<String> rmiList;
     private final FailureType failureType;
     private final int f;
     private final int n;
@@ -24,11 +25,11 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
     private Message msgToBroadcast;
 
 
-    public RBYZ_Process(int index, int value, FailureType failureType, ArrayList<String> ipList, int n, int f) throws RemoteException {
+    public RBYZ_Process(int index, int value, FailureType failureType, ArrayList<String> rmiList, int n, int f) throws RemoteException {
         this.index = index;
         this.value = value;
         this.failureType = failureType;
-        this.ipList = ipList;
+        this.rmiList = rmiList;
         this.f = f;
         this.n = n;
 
@@ -43,7 +44,7 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
      * @throws RemoteException Thrown when there is a fault concerning RMI.
      */
     private void broadcast(Message msg) throws RemoteException, InterruptedException {
-        Thread.sleep(ThreadLocalRandom.current().nextInt(11) * 1000);
+        //Thread.sleep(ThreadLocalRandom.current().nextInt(11) * 1000);
         switch(failureType) {
 
             case NONE:
@@ -64,14 +65,12 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
     }
 
     private void broadcastHelper(Message msg) throws RemoteException {
-        for(int i=0; i < ipList.size(); i++) {
-            if(i != index) {
-                try {
-                    RBYZ_RMI otherProcess = (RBYZ_RMI) Naming.lookup(ipList.get(i));
-                    otherProcess.receive(msg);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        for(int i=0; i < rmiList.size(); i++) {
+            try {
+                RBYZ_RMI otherProcess = (RBYZ_RMI) Naming.lookup(rmiList.get(i));
+                otherProcess.receive(msg);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -152,12 +151,14 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
             if(sum > f) {
                 value = 1;
                 if(sum > 3f) {
+                    System.out.println("i decided 1");
                     decided = true;
                 }
 
             } else {
                 value = 0;
                 if(n-f-sum > f) {
+                    System.out.println("i decided too its 0");
                     decided = true;
                 }
             }
@@ -178,13 +179,15 @@ public class RBYZ_Process extends UnicastRemoteObject implements RBYZ_RMI, Runna
             if(!broadcasted){
                 broadcasted = true;
                 try {
+                    if(state == )
+                    System.out.println("Process " + index + " did broadcast in round " + msgToBroadcast.getRound());
                     broadcast(msgToBroadcast);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
                 if(decided && state == ProcessState.WAITING_P) {
-                    System.exit(0);
+                    break;
                 }
             }
         }

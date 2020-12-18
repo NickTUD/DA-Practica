@@ -17,13 +17,14 @@ public class RBYZ_Main {
             System.exit(1);
         }
         ArrayList<String> ipList = new ArrayList<>();
+        ArrayList<String> rmiList = new ArrayList<>();
         int defaultport = 1099;
         String myUserID = args[0];
         int myUserIDint = Integer.parseInt(myUserID);
         LocateRegistry.createRegistry(defaultport);
 
         //read the test file
-        String testFilePath = "40processes.txt";
+        String testFilePath = "5processes.txt";
         BufferedReader bReader = new BufferedReader(new FileReader(new File("").getAbsolutePath()+"/src/"+testFilePath));
 
         //find ip addresses
@@ -39,21 +40,32 @@ public class RBYZ_Main {
         String[] nfLine = bReader.readLine().split(" ");
         int n = Integer.parseInt(nfLine[0]);
         int f = Integer.parseInt(nfLine[1]);
+        //These lines have the format <processID> <userID> <Initial Value><fault type>
+        String[] lines = new String[n];
         for(int i=0;i<n;i++){
-            //These lines have the format <processID> <userID> <Initial Value><fault type>
-            String[] splittedLine = bReader.readLine().split(" ");
-            if(splittedLine[1].equals(myUserID)){
-                //This means we have to make this process and host it on this machine
-                String rmiString = "rmi://" + ipList.get(myUserIDint) + ":" + defaultport +"/"+ splittedLine[0];
-                startProcess(splittedLine[0],splittedLine[2],splittedLine[3],ipList,n,f,rmiString);
+            lines[i]=bReader.readLine();
+            String[] splittedLine = lines[i].split(" ");
+
+            //This means we have to make this process and host it on this machine
+            String rmiString = "rmi://" + ipList.get(Integer.parseInt(splittedLine[1])) + ":" + defaultport +"/"+ splittedLine[0];
+            rmiList.add(rmiString);
+
+        }
+        for(int i=0;i<n;i++) {
+            String[] splittedLine = lines[i].split(" ");
+            if (splittedLine[1].equals(myUserID)) {
+                startProcess(splittedLine[0],splittedLine[2],splittedLine[3],rmiList,n,f,rmiList.get(i));
             }
+        }
+        for(int i=0;i<processList.size();i++){
+            new Thread(processList.get(i)).start();
         }
         System.out.println("All done");
     }
 
-    private static void startProcess(String index, String initialValue, String failureType, ArrayList<String> ipList, int n, int f, String rmiString) {
+    private static void startProcess(String index, String initialValue, String failureType, ArrayList<String> rmiList, int n, int f, String rmiString) {
         try {
-            RBYZ_Process proc = new RBYZ_Process(Integer.parseInt(index),Integer.parseInt(initialValue), RBYZ_Process.FailureType.valueOf(failureType),ipList,n,f);
+            RBYZ_Process proc = new RBYZ_Process(Integer.parseInt(index),Integer.parseInt(initialValue), RBYZ_Process.FailureType.valueOf(failureType),rmiList,n,f);
             Naming.rebind(rmiString, proc);
             processList.add(proc);
             System.out.println("Started process with id = "+index + " at "+rmiString);
