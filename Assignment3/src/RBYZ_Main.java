@@ -23,7 +23,7 @@ public class RBYZ_Main {
         int myUserIDint = Integer.parseInt(myUserID);
 
         //read the test file
-        String testFilePath = "5processes.txt";
+        String testFilePath = "6processes.txt";
         BufferedReader bReader = new BufferedReader(new FileReader(new File("").getAbsolutePath()+"/src/"+testFilePath));
 
         //find ip addresses
