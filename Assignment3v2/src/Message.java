@@ -5,18 +5,21 @@ public class Message implements Serializable {
     private MessageType type;
     private int round;
     private int value;
-    public Message(MessageType type, int r, int w){
+    private int senderIndex;
+    public Message(MessageType type, int r, int w, int senderIndex){
         this.type=type;
         this.round =r;
         this.value = w;
+        this.senderIndex=senderIndex;
     }
-    public Message(String typeString, int r, int w){
+    public Message(String typeString, int r, int w,int senderIndex){
         type = MessageType.valueOf(typeString);
         this.round = r;
         this.value = w;
+        this.senderIndex=senderIndex;
     }
     public String toString(){
-        return "Type: "+type + ", Round: "+round + ", " +"Value: "+value;
+        return "Type: "+type + ", Round: "+round + ", " +"Value: "+value+", sent by Process: "+senderIndex;
     }
     public MessageType getType() {
         return type;
