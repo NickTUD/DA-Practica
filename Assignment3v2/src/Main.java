@@ -6,6 +6,7 @@ import java.rmi.registry.LocateRegistry;
 import java.util.ArrayList;
 
 public class Main {
+
     private static ArrayList<String> ipList;
     private static ArrayList<String> portList;
     private static ArrayList<RBA_Process> processList;
@@ -60,7 +61,7 @@ public class Main {
     private static void bindProcess(String index, String initialValue, String failureType, ArrayList<String> rmiList, int n, int f, String rmiString) {
         try {
             //RBA_Process proc = new RBA_Process(Integer.parseInt(index),Integer.parseInt(initialValue), RBA_Process.FailureType.valueOf(failureType),rmiList,n,f);
-            RBA_Process proc = new RBA_Process(Integer.parseInt(index),Integer.parseInt(initialValue),rmiList, n,f);
+            RBA_Process proc = new RBA_Process(Integer.parseInt(index),Integer.parseInt(initialValue),rmiList, n,f, Fault.valueOf(failureType));
             Naming.rebind(rmiString, proc);
             processList.add(proc);
             System.out.println("Started process with id = "+index + " at "+rmiString);

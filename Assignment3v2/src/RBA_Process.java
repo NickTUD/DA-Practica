@@ -11,6 +11,7 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
     private int ownIndex;
     private int value;
     private int n, f;
+    private Fault type;
 
     private int currentRound;
 
@@ -27,12 +28,13 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
     private boolean decided;
     private boolean stopped;
 
-    public RBA_Process(int index, int initialValue, ArrayList<String> rmiList, int n, int f) throws RemoteException {
+    public RBA_Process(int index, int initialValue, ArrayList<String> rmiList, int n, int f, Fault type) throws RemoteException {
         this.ownIndex = index;
         this.value = initialValue;
         this.rmiList = rmiList;
         this.n = n;
         this.f = f;
+        this.type = type;
         resetRound(1);
         decided = false;
     }
@@ -48,9 +50,11 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
     }
 
     public void broadCast(Message m) throws RemoteException, NotBoundException, MalformedURLException {
-        for (int i = 0; i < rmiList.size(); i++) {
-            RBA_RMI otherProcess = (RBA_RMI) Naming.lookup(rmiList.get(i));
-            otherProcess.receive(m);
+        if(m.getValue() >= 0) {
+            for (int i = 0; i < rmiList.size(); i++) {
+                RBA_RMI otherProcess = (RBA_RMI) Naming.lookup(rmiList.get(i));
+                otherProcess.receive(m);
+            }
         }
         if (m.getType().equals(MessageType.P) && decided) {
             //STOP
@@ -112,11 +116,29 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
         }
     }
 
+    private Message createMessage(String msgType, int valueToSend) {
+        Message msg;
+        switch(type) {
+            case NONE:
+                msg = new Message(msgType, currentRound, valueToSend, ownIndex);
+                break;
+            case NO_SEND:
+                msg = new Message(msgType, currentRound, -1, ownIndex);
+                break;
+            case RANDOM_VAL:
+                msg = new Message(msgType, currentRound, ThreadLocalRandom.current().nextInt(0,2), ownIndex);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + type);
+        }
+        return msg;
+    }
+
 
 
     private void tryToBroadcastNotificationMessage() {
-        Message m = new Message("N", currentRound, value, ownIndex);
         try {
+            Message m = createMessage("N", value);
             broadCast(m);
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -128,7 +150,7 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
     }
 
     private void tryToBroadcastProposalMessage() {
-        System.out.println("Process "+ownIndex+"is trying to broadcast a proposal");
+        System.out.println("Process "+ownIndex+" is trying to broadcast a proposal");
         int amountOfZerosReceivedInNotificationPhaseThisRound = notificationMessagesReceivedThisRound - amountOfOnesReceivedInNotificationPhaseThisRound;
         int valueToSend;
         if (amountOfZerosReceivedInNotificationPhaseThisRound > ((n + f) / 2)) {
@@ -139,9 +161,10 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
             //choose a random value
             valueToSend = ThreadLocalRandom.current().nextInt(0, 2);
         }
-        Message m = new Message("P", currentRound, valueToSend, ownIndex);
+
 
         try {
+            Message m = createMessage("P", valueToSend);
             broadCast(m);
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -187,16 +210,15 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
             e.printStackTrace();
         }
         while (!stopped) {
-            //add possible delay here
             try {
-                Thread.sleep(200);
+                Thread.sleep(ThreadLocalRandom.current().nextInt(1, 3) * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             tryToSendMessages();
 
         }
-        System.out.println("Process "+ownIndex+"has stopped, and has decided on value: "+value);
+        System.out.println("Process "+ownIndex+" has stopped, and has decided on value: "+value);
     }
 
 
