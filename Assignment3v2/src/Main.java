@@ -25,7 +25,7 @@ public class Main {
         myUserIDString = args[0];
         myUserIDint = Integer.parseInt(myUserIDString);
         //Path to the testfile
-        String testFilePath = "5processes.txt";
+        String testFilePath = "11processes.txt";
 
         BufferedReader bReader = new BufferedReader(new FileReader(new File("").getAbsolutePath()+"/src/"+testFilePath));
         addIpsAndPorts(bReader);
