@@ -17,6 +17,7 @@ public class Main {
     private static int myUserIDint;
 
     public static void main(String[] args) throws IOException {
+        System.out.println("Starting...");
         if(args.length!=1){
             System.out.println("Arguments incorrectly set. Go to Run configurations and assign 0 or 1 to the program arguments");
             System.out.println("Choose 0 if your name is Alan and choose 1 if your name is Nick.");
@@ -25,7 +26,7 @@ public class Main {
         myUserIDString = args[0];
         myUserIDint = Integer.parseInt(myUserIDString);
         //Path to the testfile
-        String testFilePath = "11processes.txt";
+        String testFilePath = "6processes.txt";
 
         BufferedReader bReader = new BufferedReader(new FileReader(new File("").getAbsolutePath()+"/src/"+testFilePath));
         addIpsAndPorts(bReader);
