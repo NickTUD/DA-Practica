@@ -7,10 +7,17 @@ import java.util.ArrayList;
 
 public class Main {
 
+    /**
+     * Keep track of all the active processes through the lists.
+     */
     private static ArrayList<String> ipList;
     private static ArrayList<String> portList;
     private static ArrayList<RBA_Process> processList;
     private static ArrayList<String> rmiList;
+
+    /**
+     * Variables which keep track of the process independent variables.
+     */
     private static int n;
     private static int f;
     private static String myUserIDString;
@@ -26,7 +33,7 @@ public class Main {
         myUserIDString = args[0];
         myUserIDint = Integer.parseInt(myUserIDString);
         //Path to the testfile
-        String testFilePath = "6processes.txt";
+        String testFilePath = "11processes.txt";
 
         BufferedReader bReader = new BufferedReader(new FileReader(new File("").getAbsolutePath()+"/src/"+testFilePath));
         addIpsAndPorts(bReader);
@@ -38,6 +45,11 @@ public class Main {
         System.out.println("Finished.");
     }
 
+    /**
+     * Process the information regarding the processes
+     * @param bReader BufferedReader of the input file
+     * @throws IOException when something goes wrong with the reader
+     */
     private static void addProcesses(BufferedReader bReader) throws IOException {
         processList = new ArrayList<RBA_Process>();
         rmiList = new ArrayList<String>();
@@ -59,6 +71,16 @@ public class Main {
         }
     }
 
+    /**
+     * Auxilliary method which creates the Process objects and binds them.
+     * @param index ID of the process.
+     * @param initialValue The initial binary value it starts with.
+     * @param failureType Indicates if the process is faulty, and if so what type.
+     * @param rmiList List of all RMI strings.
+     * @param n Number of processes.
+     * @param f Number of faulty processes.
+     * @param rmiString The process' own RMI string.
+     */
     private static void bindProcess(String index, String initialValue, String failureType, ArrayList<String> rmiList, int n, int f, String rmiString) {
         try {
             //RBA_Process proc = new RBA_Process(Integer.parseInt(index),Integer.parseInt(initialValue), RBA_Process.FailureType.valueOf(failureType),rmiList,n,f);
@@ -71,6 +93,11 @@ public class Main {
         }
     }
 
+    /**
+     * Processes the host information
+     * @param bReader BufferedReader of the input file
+     * @throws IOException when something goes wrong with the reader
+     */
     private static void addIpsAndPorts(BufferedReader bReader) throws IOException {
         ipList = new ArrayList<String>();
         portList = new ArrayList<String>();

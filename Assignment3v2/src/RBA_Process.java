@@ -6,8 +6,13 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Class which represents a single process in the algorithm.
+ */
 public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnable {
     private ArrayList<String> rmiList = new ArrayList<>();
+    private ArrayList<Message> buffer = new ArrayList<>();
+
     private int ownIndex;
     private int value;
     private int n, f;
@@ -28,6 +33,16 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
     private boolean decided;
     private boolean stopped;
 
+    /**
+     * Constructor for a process.
+     * @param index ID of the process
+     * @param initialValue Its initial binary value
+     * @param rmiList the list of all RMI strings, needed for remote invocation.
+     * @param n The total amount of processes
+     * @param f The total amount of faulty processes.
+     * @param type Its own type, indicating faultiness or not.
+     * @throws RemoteException when something goes wrong with RMI invocations.
+     */
     public RBA_Process(int index, int initialValue, ArrayList<String> rmiList, int n, int f, Fault type) throws RemoteException {
         this.ownIndex = index;
         this.value = initialValue;
@@ -39,6 +54,11 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
         decided = false;
     }
 
+    /**
+     * Resets the round for the process, handling all things needed to start a new round such as handling messages received
+     * for future rounds.
+     * @param i The round the process should be set to.
+     */
     private void resetRound(int i) {
         currentRound = i;
         notificationMessagesReceivedThisRound = 0;
@@ -47,8 +67,27 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
         readyToBroadCastProposalMessage = false;
         amountOfOnesReceivedInNotificationPhaseThisRound = 0;
         amountOfOnesReceivedInProposalPhaseThisRound = 0;
+
+        try {
+            for(Message msg : buffer) {
+                if(msg.getRound() == currentRound) {
+                    receive(msg);
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        buffer.clear();
     }
 
+    /**
+     * Broadcast a message to all other processes.
+     * @param m The message wanted to be broadcasted.
+     * @throws RemoteException if issues with remote invocation occur
+     * @throws NotBoundException if an object is not bound in naming
+     * @throws MalformedURLException if a misformed URL is used
+     */
     public void broadCast(Message m) throws RemoteException, NotBoundException, MalformedURLException {
         if(m.getValue() >= 0) {
             for (int i = 0; i < rmiList.size(); i++) {
@@ -62,12 +101,20 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
         }
     }
 
+    /**
+     * Method that gets called when a message is received by a process
+     * @param m The message received
+     * @throws RemoteException when something funky happens with RMI.
+     */
     @Override
     public synchronized void receive(Message m) throws RemoteException {
         if(stopped){
             return;
         }
         if (m.getRound() != currentRound) {
+            if (m.getRound() > currentRound) {
+                buffer.add(m);
+            }
             System.out.println("Process " + ownIndex + " received msg: " + m.toString()+"but I am in round " + currentRound + "so I ignore the message");
             return;
         }
@@ -92,14 +139,24 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
 
     }
 
+    /**
+     * Auxilliary method which gets called if enough P-messages are received.
+     */
     private void moveToDecisionPhase() {
         readyToPerformDecisionPhase = true;
     }
 
+    /**
+     * Auxilliary method which gets called if enough N-messages are received.
+     */
     private void moveToProposalPhase() {
         readyToBroadCastProposalMessage = true;
     }
 
+    /**
+     * Method that gets called on an interval.
+     * Only actually sends messages if no messages are sent yet in any phase other than the decision phase.
+     */
     private void tryToSendMessages() {
 
         //see if we still need to send N message
@@ -116,6 +173,12 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
         }
     }
 
+    /**
+     * Auxilliary method which creates a message according to its fault type.
+     * @param msgType String indicating whether the message should be a P or N message.
+     * @param valueToSend Value which the message wants to send if it was a correct process.
+     * @return Message object containing all the necessary information.
+     */
     private Message createMessage(String msgType, int valueToSend) {
         Message msg;
         switch(type) {
@@ -134,8 +197,9 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
         return msg;
     }
 
-
-
+    /**
+     * Attempts a broadcast of messages.
+     */
     private void tryToBroadcastNotificationMessage() {
         try {
             Message m = createMessage("N", value);
@@ -149,6 +213,9 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
         }
     }
 
+    /**
+     * Handles logic of received notification message and consecutively broadcasts proposal messages
+     */
     private void tryToBroadcastProposalMessage() {
         System.out.println("Process "+ownIndex+" is trying to broadcast a proposal");
         int amountOfZerosReceivedInNotificationPhaseThisRound = notificationMessagesReceivedThisRound - amountOfOnesReceivedInNotificationPhaseThisRound;
@@ -175,6 +242,9 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
         }
     }
 
+    /**
+     * Checks after receiving enough proposal messages, whether it can decide on a value.
+     */
     private void performDecisionPhase() {
         int amountOfZerosReceivedInProposalPhaseThisRound = proposalMessagesReceivedThisRound-amountOfOnesReceivedInProposalPhaseThisRound;
         if(amountOfZerosReceivedInProposalPhaseThisRound>f||amountOfOnesReceivedInProposalPhaseThisRound>f){
@@ -201,6 +271,9 @@ public class RBA_Process extends UnicastRemoteObject implements RBA_RMI, Runnabl
         resetRound(currentRound+1);
     }
 
+    /**
+     * Method that gets run by each process so each process can be assigned to a thread.
+     */
     @Override
     public void run() {
         //initial waiting time before starting
